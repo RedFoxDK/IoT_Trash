@@ -1,0 +1,25 @@
+{
+  "name": "iot_trash",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app_test.js",
+	"start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RedFoxDK/IoT_Trash.git"
+  },
+  "author": "Martin Djurhuus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RedFoxDK/IoT_Trash/issues"
+  },
+  "homepage": "https://github.com/RedFoxDK/IoT_Trash#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mysql": "^2.15.0"
+  }
+}
