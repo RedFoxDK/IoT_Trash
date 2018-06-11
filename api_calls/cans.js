@@ -7,22 +7,44 @@ var datetime = require('node-datetime');
 
 router.post('/insert',function(req,res){
 	
-	var query = {'serial_nr':"", "battery":"", "last_empty":""};
-	
 	var can_serial = req.body.hardware_serial;
-	var data = req.body.payload_fields;
-	var time = req.body.metadata.time;
+	var got_data = req.body.payload_fields;
+	var got_time = datetime.create(req.body.metadata.time).getTime();
 	
-	query['serial_nr'] = can_serial;
-	query['battery'] = data.battery;
-	query['last_empty'] = datetime.create(time).getTime();
+	var can_sql = "SELECT * FROM Trash_cans WHERE serial_nr = "+db.escape(can_serial);
 	
-	db.query('INSERT INTO Trash_cans SET ?', query, function(err, result) {
-		if (err) throw err;
+	db.query(can_sql, function(err, result) {
+		if (err){
+			throw err;
+			res.json({"Status":"Error"});
+		}
+		
+		if (result.length > 0) {
+			var from_db = result[0];
+			var can_query = {"contect_weight":from_db.contect_weight+got_data.waste_amount, "last_hear_from":got_time};
+			got_data['time'] = got_time;
+			got_data['can_id'] = from_db.id;
+			
+			db.query('INSERT INTO Trash_waste_log SET ?', got_data, function(err, result) {
+				if (err){
+					throw err;
+					res.json({"Status":"Error"});
+				}
+				
+				db.query("UPDATE Trash_cans SET ? WHERE serial_nr = '"+can_serial+"'", can_query, function(err, result) {
+					if (err){
+						throw err;
+						res.json({"Status":"Error"});
+					}
+					res.json({"Status":"Okay"});
+				});
+			});
+		}else{
+			var msg = "Could not find following Can Serialnr: " + can_serial;
+			console.error(msg);
+			res.json({"Status":"Error", "Message":msg});
+		}
 	});
-	
-	console.log(query);
-	res.json({"Status":"Okay"});
 });
 
 router.get('', function(req,res){
@@ -31,13 +53,8 @@ router.get('', function(req,res){
 	db.query('SELECT * FROM Trash_cans', function (err, rows, fields) {
 		if (err) throw err;
 		for (var i = 0; i < rows.length; i++) {
-			console.log(i);
-			console.log(rows[i]);
 			answer[i] = rows[i];
 		}
-		
-		console.log("Done");
-		console.log(answer);
 		res.send(answer);
 	});
 })
