@@ -3,7 +3,8 @@ var bodyParser = require("body-parser");
 var fs = require('fs');
 var mysql = require('mysql');
 
-var route = require('./api_calls/user');
+var user_route = require('./api_calls/user');
+var cans_route = require('./api_calls/cans');
 
 const app = express();
 
@@ -52,7 +53,8 @@ app.post('/user', function(req, res) {
 });
 
 
-app.use('/test', route);
+app.use('/api/user', user_route);
+app.use('/api/cans', cans_route);
 
 
 app.listen(3000, () => console.log('Example app listening on port 3000!'));
