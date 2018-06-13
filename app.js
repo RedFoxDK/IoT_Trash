@@ -2,6 +2,7 @@ const express = require('express');
 var bodyParser = require("body-parser");
 var fs = require('fs');
 var mysql = require('mysql');
+var db = require("/db");
 
 const app = express();
 app.use(bodyParser.json());
