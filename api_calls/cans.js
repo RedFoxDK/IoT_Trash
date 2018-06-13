@@ -93,6 +93,42 @@ router.put('', function(req,res){
 	});
 });
 
+router.post('/update/:serial_nr', function(req,res){
+	var serial_nr = req.params.serial_nr;
+	var got_data = req.body;
+	
+	if (got_data.hasOwnProperty("id")) {
+		delete got_data["id"];
+	}
+	if (got_data.hasOwnProperty("serial_nr")) {
+		delete got_data["serial_nr"];
+	}
+	
+	db.query("UPDATE Trash_cans SET ? WHERE serial_nr = '"+serial_nr+"'", got_data, function(err, result) {
+		if (err){
+			var d_msg = "Database error handle: "+err;
+			var msg = "Database error - Try again or contact IT-administrator";
+			error_msg(res,msg, d_msg);
+		}
+		console.log("User has update can with serial number: " + serial_nr);
+		res.json({'Status':"Okay", 'Massage':'Can updated'});
+	});
+	
+});
+
+router.delete('/remove/:serial_nr', function(req,res){
+	var serial_nr = req.params.serial_nr;
+	db.query("DELETE FROM Trash_cans WHERE serial_nr = '"+serial_nr+"'", function(err, result) {
+		if (err){
+			var d_msg = "Database error handle: "+err;
+			var msg = "Database error - Try again or contact IT-administrator";
+			error_msg(res,msg, d_msg);
+		}
+		console.log("User has delete can with serial number: " + serial_nr);
+		res.json({'Status':"Okay", 'Massage':'Can has been deleted'});
+	});
+});
+
 function error_msg(res, msg, d_msg) {
 	var c_msg = "User got a error! - Message: " + msg;
 	console.error(c_msg);
