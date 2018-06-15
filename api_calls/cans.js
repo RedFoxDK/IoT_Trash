@@ -26,16 +26,18 @@ router.post('/insert',function(req,res){
 			
 			db.query('INSERT INTO Trash_waste_log SET ?', got_data, function(err, result) {
 				if (err){
-					throw err;
-					res.json({"Status":"Error"});
+					console.log(err);
+					res.json({"Status":"Error", "Message":"Database error"});
 				}
 				
-				db.query("UPDATE Trash_cans SET ? WHERE serial_nr = '"+can_serial+"'", can_query, function(err, result) {
+				db.query("UPDATE Trash_cans SET ? WHERE serial_nr ="+db.escape(can_serial), can_query, function(err, result) {
 					if (err){
-						throw err;
-						res.json({"Status":"Error"});
+						console.log(err);
+						res.json({"Status":"Error", "Message":"Database error"});
+						return 0;
 					}
 					res.json({"Status":"Okay"});
+					console.log("Cans/insert - done");
 				});
 			});
 		}else{
@@ -47,13 +49,9 @@ router.post('/insert',function(req,res){
 });
 
 router.get('', function(req,res){
-	var answer = {};
-	db.query('SELECT * FROM Trash_cans', function (err, rows, fields) {
+	db.query('SELECT * FROM Trash_cans', function (err, rows) {
 		if (err) throw err;
-		for (var i = 0; i < rows.length; i++) {
-			answer[i] = rows[i];
-		}
-		res.send(answer);
+		res.send(rows);
 	});
 });
 
@@ -104,7 +102,7 @@ router.post('/update/:serial_nr', function(req,res){
 		delete got_data["serial_nr"];
 	}
 	
-	db.query("UPDATE Trash_cans SET ? WHERE serial_nr = '"+serial_nr+"'", got_data, function(err, result) {
+	db.query("UPDATE Trash_cans SET ? WHERE serial_nr = '"+db.escape(serial_nr)+"'", got_data, function(err, result) {
 		if (err){
 			var d_msg = "Database error handle: "+err;
 			var msg = "Database error - Try again or contact IT-administrator";
@@ -118,7 +116,7 @@ router.post('/update/:serial_nr', function(req,res){
 
 router.delete('/remove/:serial_nr', function(req,res){
 	var serial_nr = req.params.serial_nr;
-	db.query("DELETE FROM Trash_cans WHERE serial_nr = '"+serial_nr+"'", function(err, result) {
+	db.query("DELETE FROM Trash_cans WHERE serial_nr = '"+db.escape(serial_nr)+"'", function(err, result) {
 		if (err){
 			var d_msg = "Database error handle: "+err;
 			var msg = "Database error - Try again or contact IT-administrator";
