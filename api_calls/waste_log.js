@@ -1,7 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var router = express.Router();
-var db = require("../db");
+var db = require("../functions/db");
 var datetime = require('node-datetime');
 
 
@@ -50,7 +50,7 @@ router.put('/create', function(req,res) { ///// IKKE FÆRDIG ENDNU!!!!!!!!!
 	});
 });
 
-router.post('/update:id', function(req, res) {
+router.post('/update/:id', function(req, res) {
 	var got_data = req.body;
 	var id = req.params.id;
 	
@@ -67,6 +67,10 @@ router.post('/update:id', function(req, res) {
 			res.json(result);
 		//}
 	});
+});
+
+router.all('*', function(req, res){
+  res.status(404).send("Nope");
 });
 
 function error_msg(res, msg, d_msg) {

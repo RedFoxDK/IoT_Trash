@@ -1,7 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var router = express.Router();
-var db = require("../db");
+var db = require("../functions/db");
 var datetime = require('node-datetime');
 
 
@@ -57,9 +57,9 @@ router.get('', function(req,res){
 
 router.put('', function(req,res){
 	var got_data = req.body;
-	if (got_data.hasOwnProperty("serial_nr") && got_data.hasOwnProperty("trash_cans_type_id")) {
+	if (got_data.hasOwnProperty("serial_nr") && got_data.hasOwnProperty("cans_type_id")) {
 		var can_serial = got_data["serial_nr"];
-		var can_type = got_data["trash_cans_type_id"];
+		var can_type = got_data["cans_type_id"];
 	}else{
 		var msg = "Couldn't find either the can's serial nr orthe cans type";
 		error_msg(res,msg, NULL);
