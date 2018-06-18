@@ -22,7 +22,7 @@ router.put('/create', function(req,res) {
 	if (!got_data.hasOwnProperty('name')) {
 		var msg = "The api can't beused with out the values for: name";
 		console.log(msg);
-		exit();
+		res.json({"Status":"Error", "Message":msg});
 	}
 	if (got_data.hasOwnProperty('is_company') || got_data.hasOwnProperty('is_state') || got_data.hasOwnProperty('is_dev')) {
 		got_data["is_private"] = 0;
