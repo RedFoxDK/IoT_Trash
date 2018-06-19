@@ -36,8 +36,9 @@ router.put('/create', function(req, res) {
 	if (!got_data.hasOwnProperty('name') || !got_data.hasOwnProperty('email')) {
 		var msg = "The api can't beused with out the values for: name, email and sercert";
 		console.log(msg);
-		exit();
+		res.json({"Status":"Error", "Message": msg});
 	}
+	
 	var secert = crypt.random();
 	got_data["sercet_hash"] = crypt.hash(secert);
 	
@@ -63,6 +64,9 @@ router.put('/create', function(req, res) {
 				delete got_data["sercet_hash"];
 				res.json(got_data);
 			});
+		}else{
+			var msg = "Error";
+			res.json({"Status":"Error", "Message": msg});
 		}
 	});
 });

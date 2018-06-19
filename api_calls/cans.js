@@ -3,49 +3,88 @@ var bodyParser = require("body-parser");
 var router = express.Router();
 var db = require("../functions/db");
 var datetime = require('node-datetime');
+var request = require('request');
 
 
 router.post('/insert',function(req,res){
 	var can_serial = req.body.hardware_serial;
 	var got_data = req.body.payload_fields;
+	var new_card = req.body.payload_fields.new_card;
 	var got_time = datetime.create(req.body.metadata.time).getTime();
 	
-	var can_sql = "SELECT * FROM Trash_cans WHERE serial_nr = "+db.escape(can_serial);
+	if (got_data.length < 1) {
+		res.json({"Status":"Okay"});
+	}
 	
-	db.query(can_sql, function(err, result) {
-		if (err){
-			console.log(err);
-			res.json({"Status":"Error", "Message":"Database error"});
-		}
+	
+	
+	if (new_card == 1) {
+		var card_nr = got_data["user_id"];
+		var download_link = req.body.downlink_url;
+		var port = req.body.port;
+		var dev_id = req.body.dev_id;
 		
-		if (result.length > 0) {
-			var from_db = result[0];
-			var can_query = {"contect_weight":from_db.contect_weight+got_data.waste_amount, "last_hear_from":got_time};
-			got_data['time'] = got_time;
-			got_data['can_id'] = from_db.id;
+		var obj = {"dev_id":dev_id, "port":port, "confirmed":false};
+
+		db.query("SELECT * FROM Trash_cards WHERE is_active = 1 AND card_nr="+db.escape(card_nr), function(err, result) {	
+			var answer = "0";
+			if (result.length > 0) {
+				answer = "1";
+			}
+			var test = new Buffer(answer);
+			answer = test.toString('base64');
+			obj["payload_raw"] = answer;
 			
-			db.query('INSERT INTO Trash_waste_log SET ?', got_data, function(err, result) {
-				if (err){
-					console.log(err);
-					res.json({"Status":"Error", "Message":"Database error"});
+			var options = {url:download_link, 'content-type': 'application/json', body: JSON.stringify(obj)};
+
+			request.post(options, function (error, response, body) {
+				if (!error && response.statusCode == 200) {
+					// Print out the response body
+					console.log("New card infomation have been send");
 				}
+			});
+		});
+		res.json({"Status":"Okay"});
+	}else{
+		delete got_data["new_card"];
+		
+		var can_sql = "SELECT * FROM Trash_cans WHERE serial_nr = "+db.escape(can_serial);
+		
+		db.query(can_sql, function(err, result) {
+			if (err){
+				console.log(err);
+				res.json({"Status":"Error", "Message":"Database error"});
+			}
+			
+			if (result.length > 0) {
+				var from_db = result[0];
+				var can_query = {"contect_weight":from_db.contect_weight+got_data.waste_amount, "last_hear_from":got_time};
+				got_data['time'] = got_time;
+				got_data['can_id'] = from_db.id;
 				
-				db.query("UPDATE Trash_cans SET ? WHERE serial_nr ="+db.escape(can_serial), can_query, function(err, result) {
+				db.query('INSERT INTO Trash_waste_log SET ?', got_data, function(err, result) {
 					if (err){
 						console.log(err);
 						res.json({"Status":"Error", "Message":"Database error"});
-						return 0;
 					}
-					res.json({"Status":"Okay"});
-					console.log("Cans/insert - done");
+					
+					db.query("UPDATE Trash_cans SET ? WHERE serial_nr ="+db.escape(can_serial), can_query, function(err, result) {
+						if (err){
+							console.log(err);
+							res.json({"Status":"Error", "Message":"Database error"});
+							return 0;
+						}
+						res.json({"Status":"Okay"});
+						console.log("Cans/insert - done");
+					});
 				});
-			});
-		}else{
-			var msg = "Could not find following Can Serialnr: " + can_serial;
-			console.error(msg);
-			res.json({"Status":"Error", "Message":msg});
-		}
-	});
+			}else{
+				var msg = "Could not find following Can Serialnr: " + can_serial;
+				console.error(msg);
+				res.json({"Status":"Error", "Message":msg});
+			}
+		});
+	}
 });
 
 router.get('', function(req,res){

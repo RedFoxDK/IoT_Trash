@@ -3,11 +3,16 @@ var bodyParser = require("body-parser");
 var router = express.Router();
 var db = require("../functions/db");
 
+var log = require('../functions/log_error');
+
+
 
 router.get('/', function(req,res){
+	log.error_msg(req, res, 1, "Test", "Hemlig test");
 	db.query("SELECT * FROM Trash_cards", function(err, result){
-		res.json(result);
+		//res.json(result);
 	});
+	
 });
 
 router.post('/deactivate', function(req, res) {
@@ -146,7 +151,7 @@ router.post('/update', function(req, res) {
 });
 
 router.all('*', function(req, res){
-  res.status(404).send("Nope");
+  res.status(401).json({"Status":"Error"});
 });
 
 module.exports = router;
