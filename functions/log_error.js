@@ -1,7 +1,7 @@
 var fs = require('fs');
 var exports;
 
-exports.error_msg = function(req, res, type_id, msg, d_msg, data) {
+exports.error_msg = function(req, res, type_id, finally_msg, msg, d_msg, data) {
 	
 	var path = req.originalUrl;
 	var ip = (req.headers['x-forwarded-for'] ||
@@ -12,12 +12,15 @@ exports.error_msg = function(req, res, type_id, msg, d_msg, data) {
 	var log_type = get_type(type_id);
 	
 	console_write(log_type.type, path, ip, d_msg, msg);
-	var resp = {"Status":log_type.status_id, "Status_Text":log_type.status};
 	
-	if (msg != 0) resp["Package_messages"] = msg;
-	if (data) resp["Package_data"] = data;
+	if (finally_msg == 1) {
+		var resp = {"Status":log_type.status_id, "Status_Text":log_type.status};
 		
-	res.status(log_type.http).json(resp);
+		if (msg != 0) resp["Package_messages"] = msg;
+		if (data) resp["Package_data"] = data;
+			
+		res.status(log_type.http).json(resp);
+	}
 };
 
 function get_type(type_id) {
@@ -134,4 +137,3 @@ function log_time(is_for_name) {
 };
 
 module.exports = exports;
-
