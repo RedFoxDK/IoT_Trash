@@ -15,7 +15,7 @@ router.get('', function (req, res) {
 				user_type_id = result[0].user_type_id;
 				db.query("SELECT * FROM Trash_user_type WHERE id="+result[0].user_type_id, function(err, result){
 					if (result.length > 0) {
-						if (result[0].is_admin == 1) { //start here
+						if (result[0].is_admin == 1) { 
 							db.query("SELECT * FROM Trash_api_token", function(err, result) {
 								res.json(result);
 							});
@@ -35,7 +35,7 @@ router.get('', function (req, res) {
 
 
 
-router.get('/by_user_id/:user_id', function(req, res) {
+router.post('/by_user_id/:user_id', function(req, res) {
 	var id = req.params.user_id;
 	var api_token = req.get('X-API-TOKEN');
 	var got_data = req.body;
@@ -403,6 +403,7 @@ router.put('/create', function(req,res) {
 			db.query("SELECT * FROM Trash_user WHERE email="+db.escape(auth_email)+" AND sercet_hash="+db.escape(auth_sercet), function(err, result) {
 				if(result.length > 0) {
 					user_id = result[0].id;
+					got_data["user_id"] = user_id;
 					create(res, got_data);
 				}else{
 					var msg = "The api auth can't find you";
