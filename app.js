@@ -16,7 +16,7 @@ const app = express(); // create the webapp
 
 //Create and route for the Swagger API
 var swaggerUi = require('swagger-ui-express');
-var swaggerDocument = require('./api_docs/swagger_2.json');
+var swaggerDocument = require('./api_docs/swagger.json');
 
 
 app.get('/', (req, res) => res.redirect('/api-docs')); //rereoute any from / to /api-doces
