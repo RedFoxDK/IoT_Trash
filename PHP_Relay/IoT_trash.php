@@ -2,7 +2,7 @@
 header('Content-Type: application/json');
 class IoT_Trash
 {
-	private $url = "THE URL TO THE SERVER";
+	private $url = "INSERT END URL";
 	
 	private function get_data() 
 	{
@@ -42,7 +42,7 @@ class IoT_Trash
 		echo $response;
 		
 	}
-	
+
 	public function __construct() 
 	{
 		$data = json_encode($this->get_data());
